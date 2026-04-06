@@ -7,8 +7,8 @@ data "azurerm_kubernetes_service_versions" "current" {
   special = false
   upper   = false
 }
-resource "azurerm_kubernetes_cluster" "aks-cluster" {
-  name = "{var.cluster_name}-${random_string.name_suffix.result}"
+resource "azurerm_kubernetes_cluster" "aks_cluster" {
+  name = substr(lower("${var.cluster_name}-${random_string.name_suffix.result}") , 0, 12)
   location              = var.location
   resource_group_name   = var.rg
   dns_prefix            = "${var.rg}-cluster"           
@@ -17,7 +17,7 @@ resource "azurerm_kubernetes_cluster" "aks-cluster" {
   oidc_issuer_enabled = true
   
   default_node_pool {
-    name       = "{var.node_pool_name}-${random_string.name_suffix.result}"
+    name       = substr(lower("${var.node_pool_name}${random_string.name_suffix.result}"), 0, 12)
     vm_size    = "standard_d2d_v4"
     zones   = [1, 2, 3]
     auto_scaling_enabled = true
