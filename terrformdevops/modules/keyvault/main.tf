@@ -24,7 +24,7 @@ access_policy {
     ]
 
     secret_permissions = [
-      "Get", "List" , "Set"
+      "Get", "List" , "Set" , "Purge" , "Delete"
     ]
 
     storage_permissions = [

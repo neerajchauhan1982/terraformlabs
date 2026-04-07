@@ -8,7 +8,8 @@ variable "service_principal_name" {
 }
 
 variable "ssh_public_key" {
-  default = "c:/Users/chauh/.ssh/azure_vm_rsa.pub"
+  type      = string
+  sensitive = true
 }
 
 variable "client_id" {}
