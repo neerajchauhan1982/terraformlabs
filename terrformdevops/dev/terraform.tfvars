@@ -1,7 +1,0 @@
-rg                     = "rg-dev"
-location               = "centralus"
-service_principle_name = "aks_user001"
-SUB_ID                 = "ec9876a3-fa1f-4980-b053-bca7123aedd5"
-cluster_name           = "AKS"
-node_pool_name         = "aksnod"
-keyvault_name          = "keyvault"
