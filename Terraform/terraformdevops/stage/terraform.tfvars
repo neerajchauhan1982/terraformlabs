@@ -1,7 +1,7 @@
 rg                     = "rg-stage"
 location               = "centralus"
 service_principle_name = "aks_stage"
-SUB_ID                 = "ec9876a3-fa1f-4980-b053-bca7123aedd5"
+SUB_ID                 = "Enter subscription id"
 cluster_name           = "AKS"
 node_pool_name         = "aksnod"
 keyvault_name          = "keyvault-stage"
