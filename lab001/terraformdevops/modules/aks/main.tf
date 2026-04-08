@@ -25,8 +25,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     min_count            = 1
     os_disk_size_gb      = 30
     type                 = "VirtualMachineScaleSets"
-    tags = { environment = dev 
- }
 
   }
 

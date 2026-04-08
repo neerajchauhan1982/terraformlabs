@@ -1,0 +1,65 @@
+parameters:
+  env: ''
+
+jobs:
+  - job: ${{parameters.env}}_validate_tf
+    displayName: 'Validate ${{parameters.env}} terraform scripts'
+    pool:
+      vmImage: windows-latest
+
+    steps:
+    - checkout: self
+
+    - task: TerraformInstaller@1 # 1st/ install terraform
+      displayName: 'Install Terraform' # install always need to be installed at every stage
+      inputs:
+        terraformVersion: '1.9.8'
+
+    - task: TerraformTaskV4@4
+      displayName: 'Initialise Terraform' # init needs to be installed at every stage
+      inputs:
+        provider: 'azurerm'
+        command: init
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}' # where the Terraform code is at
+        # fetched from variables (azure-pipeline.yml)
+        backendServiceArm: $(ServiceConnectionName)
+        backendAzureRmResourceGroupName: '$(bk-rg-name)'  
+        backendAzureRmStorageAccountName: '$(bk-str-account-name)'  
+        backendAzureRmContainerName: '$(bk-container-name)'  
+        backendAzureRmKey: '${{ parameters.env }}$(bk-key)'  
+
+    - task: TerraformTaskV4@4
+      displayName: 'Validate Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'validate' 
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'  
+
+    - task: TerraformTaskV4@4
+      displayName: 'Plan Terraform'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+        environmentServiceNameAzureRM: $(ServiceConnectionName)
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out=$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}/terraform.tfplan'
+        # var file = selecting the tfvars for each environment
+        # out = creating the plan file to the Infrastructure folder and call it terraform.tfplan
+
+    - task: CopyFiles@2
+      displayName: 'Moving Terraform Code to artifact staging'
+      inputs:
+        Contents: | 
+          terraformdevops/${{ parameters.env }}/**
+          terraformdevops/modules/**
+        TargetFolder: '$(build.ArtifactStagingDirectory)'
+        # Plan and apply are on different machines
+        # plan state should thus be saved on a file
+        # it will be then be loaded by apply
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Making artifact available to apply stage'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'output-${{parameters.env}}'
+        publishLocation: 'Container'

@@ -1,0 +1,60 @@
+name: $(BuildDefinitionName)$(SourceBranchName)$(date:yyyyMMdd)$(rev:.r)
+
+trigger: none
+# branches:
+#   include:
+#     - main
+
+parameters:
+- name: runDestroy
+  displayName: Run destroy stage
+  type: boolean
+  default: false
+
+variables:
+  ServiceConnectionName: 'az-devops'
+  bk-rg-name: 'tfbackend'
+  bk-str-account-name: 'storage19821983'
+  bk-container-name: 'tfdev'
+  bk-key: 'terraform.tfstate'
+stages:
+  - stage: validate_terraform
+    displayName: 'Validate Terraform'
+    # condition: eq('${{ parameters.runDestroy }}', 'false'))
+    jobs:
+      - template: Terraform/plan.yml
+        parameters:
+          env: dev
+
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+        - template: Terraform/plan.yml
+          parameters:
+            env: stage
+
+  - stage: deploy_terraform
+    displayName: 'Deploy Terraform'
+    dependsOn:
+      - validate_terraform
+    # condition: and(succeeded(), eq('${{ parameters.runDestroy }}', 'false'))
+    jobs:
+      - template: Terraform/deploy.yml
+        parameters:
+          env: dev
+
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+        - template: Terraform/deploy.yml
+          parameters:
+            env: stage
+
+  - stage: destroy_terraform
+    displayName: 'Destroy Terraform'
+    # condition: eq('${{ parameters.runDestroy }}', 'true'))
+    jobs:
+      - template: Terraform/destroy.yml
+        parameters:
+          env: dev
+
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+        - template: Terraform/destroy.yml
+          parameters:
+            env: stage

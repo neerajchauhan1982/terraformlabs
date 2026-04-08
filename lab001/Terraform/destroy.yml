@@ -1,0 +1,47 @@
+parameters:
+  env: ''
+
+jobs:
+- deployment: destroy_infrastructure_${{ parameters.env }}
+  displayName: 'Destroy infrastructure for ${{ parameters.env }}'
+  pool:
+    vmImage: 'windows-latest'
+  environment: 'destroy_infrastructure_${{ parameters.env }}'
+
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: '1.9.8'
+
+          - powershell: |
+              where.exe terraform
+              terraform version
+              Get-ChildItem -Path "$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}"
+            displayName: 'Verify Terraform and working directory'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Initialise Terraform'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+              backendServiceArm: $(ServiceConnectionName)
+              backendAzureRmResourceGroupName: '$(bk-rg-name)'
+              backendAzureRmStorageAccountName: '$(bk-str-account-name)'
+              backendAzureRmContainerName: '$(bk-container-name)'
+              backendAzureRmKey: '${{ parameters.env }}terraform.tfstate'
+
+          - task: TerraformTaskV4@4
+            displayName: 'Destroy Terraform'
+            inputs:
+              provider: 'azurerm'
+              command: 'destroy'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+              environmentServiceNameAzureRM: $(ServiceConnectionName)
+              commandOptions: '-lock=true -lock-timeout=5m -auto-approve -var-file="terraform.tfvars"'

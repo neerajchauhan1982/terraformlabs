@@ -1,0 +1,45 @@
+name: $(BuildDefinitionName)$(SourceBranchName)$(date:yyyyMMdd)$(rev:.r)
+
+trigger: none
+  # branches:
+  #   include:
+  #   - main
+  #   # - development
+
+variables: # terraform variables
+ ServiceConnectionName: 'az-devops'
+ bk-rg-name: 'tfbackend'
+ bk-str-account-name: 'storage19821983'
+ bk-container-name: 'tfdev'
+ bk-key: 'terraform.tfstate' # key is actually name of the file, determined here
+
+pool:
+  vmImage: ubuntu-latest # This is the default if you don't specify a pool or vmImage.
+
+stages:
+  - stage: validate_terraform
+    displayName: 'Validate Terraform'
+
+    jobs:
+    - template: Terraform/plan.yml
+      parameters:
+        env: dev
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main')}}: #if branch is main then execute
+      - template: Terraform/plan.yml
+        parameters:
+          env: stage
+
+  - stage: deploy_terraform
+    displayName: 'Deploy Terraform'
+    dependsOn:
+    - validate_terraform # makes sure validate_terraform stage runs first
+    condition: succeeded('validate_terraform') ## stage runs only if validate_terraform is successful
+
+    jobs:
+    - template: Terraform/deploy.yml
+      parameters:
+        env: dev
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main')}}: #if branch is main then execute
+      - template: Terraform/deploy.yml
+        parameters:
+          env: stage

@@ -1,0 +1,54 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+ branches:
+   include:
+     - main
+     - feature/*
+ paths:
+   include:
+   - terrformdevops/*
+   - azure-pipelines.yml
+stages:
+ - stage: validate
+   jobs:
+   - job: tf_validate
+     pool:
+       name: Azure Pipelines
+      - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@1
+  displayName: 'Install Terraform latest'
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTask@5
+  displayName: 'Terraform : init'
+  inputs:
+    workingDirectory: terrformdevops/dev
+    backendAzureRmUseEntraIdForAuthentication: false
+    backendServiceArm: 'az-devops'
+    backendAzureRmResourceGroupName: tfbackend
+    backendAzureRmStorageAccountName: storage19821983
+    backendAzureRmContainerName: tfdev
+    backendAzureRmKey: dev.terraform.tfstate
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTask@5
+  displayName: 'Terraform : plan'
+  inputs:
+    command: plan
+    workingDirectory: terrformdevops/dev
+    environmentServiceNameAzureRM: 'az-devops'
+
+- task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTask@5
+  displayName: 'Terraform : destroy'
+  inputs:
+    command: destroy
+    workingDirectory: terrformdevops/dev
+    commandOptions: '--auto-approve'
+    environmentServiceNameAzureRM: 'az-devops'
+
+
+
+
+
+    

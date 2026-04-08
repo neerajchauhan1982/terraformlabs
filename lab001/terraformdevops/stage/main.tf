@@ -1,8 +1,6 @@
 resource "azurerm_resource_group" "rg" {
   name     = var.rg
   location = var.location
- tags = { environment = dev 
- }
 }
 module "service_principle_name" {
   source                 = "../modules/spn"
@@ -14,17 +12,9 @@ module "service_principle_name" {
 resource "azurerm_role_assignment" "rolespn" {
 
   scope                = "/subscriptions/${var.SUB_ID}"
-  role_definition_name = "contributor"
+  role_definition_name = "Contributor"
   principal_id         = module.service_principle_name.object_id
-  depends_on = [
-    module.service_principle_name
-  ]
-}
-resource "azurerm_role_assignment" "rolekv" {
 
-  scope                = "/subscriptions/${var.SUB_ID}"
-  role_definition_name = "Key Vault Contributor"
-  principal_id         = module.service_principle_name.object_id
   depends_on = [
     module.service_principle_name
   ]
@@ -35,7 +25,7 @@ module "keyvault" {
   location      = var.location
   rg            = var.rg
   depends_on = [
-    azurerm_role_assignment.rolekv
+    module.service_principle_name
   ]
 }
 
