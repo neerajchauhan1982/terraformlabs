@@ -21,11 +21,11 @@ stages:
     displayName: 'Validate Terraform'
 
     jobs:
-    - template: Terraform/plan.yml
+    - template: Jobs/plan.yml
       parameters:
         env: dev
     - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main')}}: #if branch is main then execute
-      - template: Terraform/plan.yml
+      - template: Jobs/plan.yml
         parameters:
           env: stage
 
@@ -36,10 +36,10 @@ stages:
     condition: succeeded('validate_terraform') ## stage runs only if validate_terraform is successful
 
     jobs:
-    - template: Terraform/deploy.yml
+    - template: Jobs/deploy.yml
       parameters:
         env: dev
     - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main')}}: #if branch is main then execute
-      - template: Terraform/deploy.yml
+      - template: Jobs/deploy.yml
         parameters:
           env: stage

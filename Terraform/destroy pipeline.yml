@@ -22,12 +22,12 @@ stages:
     displayName: 'Validate Terraform'
     # condition: eq('${{ parameters.runDestroy }}', 'false'))
     jobs:
-      - template: Terraform/plan.yml
+      - template: Jobs/plan.yml
         parameters:
           env: dev
 
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-        - template: Terraform/plan.yml
+        - template: Jobs/plan.yml
           parameters:
             env: stage
 
@@ -37,12 +37,12 @@ stages:
       - validate_terraform
     # condition: and(succeeded(), eq('${{ parameters.runDestroy }}', 'false'))
     jobs:
-      - template: Terraform/deploy.yml
+      - template: Jobs/deploy.yml
         parameters:
           env: dev
 
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-        - template: Terraform/deploy.yml
+        - template: Jobs/deploy.yml
           parameters:
             env: stage
 
@@ -50,11 +50,11 @@ stages:
     displayName: 'Destroy Terraform'
     # condition: eq('${{ parameters.runDestroy }}', 'true'))
     jobs:
-      - template: Terraform/destroy.yml
+      - template: Jobs/destroy.yml
         parameters:
           env: dev
 
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-        - template: Terraform/destroy.yml
+        - template: Jobs/destroy.yml
           parameters:
             env: stage
