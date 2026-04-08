@@ -22,7 +22,7 @@ jobs:
           - powershell: |
               where.exe terraform
               terraform version
-              Get-ChildItem -Path "$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}"
+              Get-ChildItem -Path "$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}"
             displayName: 'Verify Terraform and working directory'
 
           - task: TerraformTaskV4@4
@@ -30,7 +30,7 @@ jobs:
             inputs:
               provider: 'azurerm'
               command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}'
               backendServiceArm: $(ServiceConnectionName)
               backendAzureRmResourceGroupName: '$(bk-rg-name)'
               backendAzureRmStorageAccountName: '$(bk-str-account-name)'
@@ -42,6 +42,6 @@ jobs:
             inputs:
               provider: 'azurerm'
               command: 'destroy'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}'
               environmentServiceNameAzureRM: $(ServiceConnectionName)
               commandOptions: '-lock=true -lock-timeout=5m -auto-approve -var-file="terraform.tfvars"'
