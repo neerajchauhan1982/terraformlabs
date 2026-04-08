@@ -20,7 +20,7 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: init
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}' # where the Terraform code is at
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}' # where the Terraform code is at
         # fetched from variables (azure-pipeline.yml)
         backendServiceArm: $(ServiceConnectionName)
         backendAzureRmResourceGroupName: '$(bk-rg-name)'  
@@ -33,16 +33,16 @@ jobs:
       inputs:
         provider: 'azurerm'
         command: 'validate' 
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'  
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}'  
 
     - task: TerraformTaskV4@4
       displayName: 'Plan Terraform'
       inputs:
         provider: 'azurerm'
         command: 'plan'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}'
         environmentServiceNameAzureRM: $(ServiceConnectionName)
-        commandOptions: '-lock=false -var-file="terraform.tfvars" -out=$(System.DefaultWorkingDirectory)/terraformdevops/${{ parameters.env }}/terraform.tfplan'
+        commandOptions: '-lock=false -var-file="terraform.tfvars" -out=$(System.DefaultWorkingDirectory)/Terraform/terraformdevops/${{ parameters.env }}/terraform.tfplan'
         # var file = selecting the tfvars for each environment
         # out = creating the plan file to the Infrastructure folder and call it terraform.tfplan
 
@@ -50,8 +50,8 @@ jobs:
       displayName: 'Moving Terraform Code to artifact staging'
       inputs:
         Contents: | 
-          terraformdevops/${{ parameters.env }}/**
-          terraformdevops/modules/**
+          Terraform/terraformdevops/${{ parameters.env }}/**
+          Terraform/terraformdevops/modules/**
         TargetFolder: '$(build.ArtifactStagingDirectory)'
         # Plan and apply are on different machines
         # plan state should thus be saved on a file
