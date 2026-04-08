@@ -28,7 +28,7 @@ jobs:
             inputs:
               provider: 'azurerm'
               command: 'init'
-              workingDirectory: '$(Pipeline.Workspace)/output-${{ parameters.env }}/terraformdevops/${{ parameters.env }}'
+              workingDirectory: '$(Pipeline.Workspace)/output-${{ parameters.env }}/Terraform/terraformdevops/${{ parameters.env }}'
               backendServiceArm: $(ServiceConnectionName)
               backendAzureRmResourceGroupName: '$(bk-rg-name)'
               backendAzureRmStorageAccountName: '$(bk-str-account-name)'
@@ -39,7 +39,7 @@ jobs:
             inputs:
               provider: 'azurerm'
               command: 'apply'
-              workingDirectory: '$(Pipeline.Workspace)/output-${{ parameters.env }}/terraformdevops/${{ parameters.env }}'
+              workingDirectory: '$(Pipeline.Workspace)/output-${{ parameters.env }}/Terraform/terraformdevops/${{ parameters.env }}'
               environmentServiceNameAzureRM: $(ServiceConnectionName)
               commandOptions: '-lock=true -lock-timeout=5m terraform.tfplan'
               # lock timeout so lease is unlocked after 5 minutes
